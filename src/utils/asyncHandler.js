@@ -1,5 +1,5 @@
 const asyncHandler = (requestHandler) => {
-  (req, res, next) => {
+  return (req, res, next) => {
     Promise.resolve(requestHandler(req, res, next)).catch((error) =>
       next(error)
     );
@@ -17,9 +17,9 @@ const asyncHandler = (func) => async (res, req, next) => {
   try {
     await func(req, res, next);
   } catch (error) {
-    res.status(err.code || 500).json({
+    res.status(error.code || 500).json({
       success: false,
-      message: err.message,
+      message: error.message,
     });
   }
 };
