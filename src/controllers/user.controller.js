@@ -4,6 +4,30 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
+const generateAccessAndRefreshTokens = async (userId) => {
+  try {
+    const user = await User.findById(userId);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken; // We can update the current user model by just accessing its variable then perform a save operation to update new fields
+    await user.save({ validateBeforeSave: false });
+    /*
+    whenever we called save method from Mongodb it always check for the required 
+    fields so if we put validate before say false then it would not validate the 
+    required fields and justice save the documents it is needed to set the refresh 
+    token while user is logging in and we need to save its refresh token in database
+    */
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    throw new ApiError(
+      500,
+      "Something went wrong while generating Access and Refresh token."
+    );
+  }
+};
+
 const registerUser = asyncHandler(async (req, res) => {
   const { email, password, username, fullName } = req.body;
 
@@ -66,4 +90,80 @@ const registerUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, createdUser, "User registered successfully."));
 });
 
-export { registerUser };
+const loginUser = asyncHandler(async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email)
+    throw new ApiError(400, "Username or Email is required.");
+
+  const user = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+
+  if (!user) throw new ApiError(404, "User not exist.");
+
+  const isPasswordValid = await user.isPasswordCorrect(password);
+
+  if (!isPasswordValid) throw new ApiError(401, "Password is incorrect");
+
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
+
+  const loggedInUser = await User.findById(user._id).select(
+    "-password -refreshToken -__v -createdAt -updatedAt"
+  );
+
+  // Sending Cookies
+  /*
+    By adding http only true and secure option true the cookies we set 
+    from back end can only be accessed via back end front end can only 
+    view the cookies but not can modify the cookies this is the extra 
+    security we provided to the cookies
+  */
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        201,
+        {
+          user: loggedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User logged in successfully."
+      )
+    );
+});
+
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToken: undefined,
+      },
+    },
+    {
+      new: true, // If we add this value, then after updating the fields, the updated user will be returned
+    }
+  );
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(201, {}, "User logged out."));
+});
+
+export { registerUser, loginUser, logoutUser };
