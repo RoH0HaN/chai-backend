@@ -2,7 +2,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFromCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -30,6 +33,11 @@ const generateAccessAndRefreshTokens = async (userId) => {
   }
 };
 
+const validateEmail = (email) => {
+  const regEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regEx.test(email);
+};
+
 const registerUser = asyncHandler(async (req, res) => {
   const { email, password, username, fullName } = req.body;
 
@@ -39,13 +47,7 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All fields required.");
   }
 
-  const validateEmail = () => {
-    const regEx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regEx.test(email);
-  };
-  console.log(validateEmail());
-
-  if (!validateEmail()) throw new ApiError(400, "Valid email required.");
+  if (!validateEmail(email)) throw new ApiError(400, "Valid email required.");
 
   const existedUser = await User.findOne({
     $or: [{ username }, { email }],
@@ -97,6 +99,10 @@ const loginUser = asyncHandler(async (req, res) => {
 
   if (!(username || email))
     throw new ApiError(400, "Username or Email is required.");
+
+  if (email) {
+    if (!validateEmail(email)) throw new ApiError(400, "Valid email required.");
+  }
 
   const user = await User.findOne({
     $or: [{ username }, { email }],
@@ -165,7 +171,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .status(200)
     .clearCookie("accessToken", options)
     .clearCookie("refreshToken", options)
-    .json(new ApiResponse(201, user, "User logged out."));
+    .json(new ApiResponse(201, {}, "User logged out."));
 });
 
 const refresshAccessToken = asyncHandler(async (req, res) => {
@@ -211,4 +217,174 @@ const refresshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refresshAccessToken };
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if ([oldPassword, newPassword].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields required.");
+  }
+
+  const user = await User.findById(req.user?._id);
+
+  if (!user)
+    throw new ApiError(
+      500,
+      "Something went wrong while fethching user information."
+    );
+
+  const isOldPasswordValid = await user.isPasswordCorrect(oldPassword);
+
+  if (!isOldPasswordValid)
+    throw new ApiError(401, "Old password is not valid.");
+
+  user.password = newPassword;
+  const updatedUser = await user.save({ validateBeforeSave: false });
+
+  const isPasswordChanged = await updatedUser.isPasswordCorrect(newPassword);
+
+  if (!isPasswordChanged)
+    throw new ApiError(
+      500,
+      "Something went wrong while updating the password."
+    );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(201, {}, "Password changed successfully."));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+    .status(200)
+    .json(new ApiResponse(201, req.user, "Current user fetched successfully."));
+});
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { email, username, fullName } = req.body;
+
+  if (!email && !username && !fullName)
+    throw new ApiError(400, "One fields must required.");
+
+  if (email) {
+    if (!validateEmail(email)) throw new ApiError(400, "Valid email required.");
+  }
+
+  const user = await User.findById(req.user?._id).select(
+    "-password -refreshToken -__v -createdAt -updatedAt"
+  );
+
+  if (email && user.email !== email) user.email = email;
+  if (username && user.username !== username) user.username = username;
+  if (fullName && user.fullName !== fullName) user.fullName = fullName;
+
+  const updatedUser = await user.save({ validateBeforeSave: false });
+
+  if (!updatedUser)
+    throw new ApiError(
+      500,
+      "Something went wrong while updating the information."
+    );
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(201, updatedUser, "Account details updated successfully.")
+    );
+});
+
+const changeAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+
+  if (!avatarLocalPath) throw new ApiError(401, "Avatar filepath is missing.");
+
+  if (!req.user) throw new ApiError(401, "User can't be fetched.");
+
+  const avatarUrl = req.user?.avatar;
+
+  if (!avatarUrl)
+    throw new ApiError(401, "Avatar URL can't be fetched fromm user.");
+
+  const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  if (!avatar) throw new ApiError(400, "Error while uploading on avatar.");
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: avatar.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken -__v -createdAt");
+
+  if (user.avatar !== avatarUrl) {
+    const parts = avatarUrl.split("/");
+    // Get the last part of the URL
+    const lastPart = parts[parts.length - 1];
+    // Split the last part by '.' to remove the file extension
+    const cloudinaryFileName = lastPart.split(".")[0];
+
+    await deleteFromCloudinary(cloudinaryFileName);
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(201, user, "Avatar updated successfully."));
+});
+
+const changeCoverImage = asyncHandler(async (req, res) => {
+  const coverImageLocalPath = req.file?.path;
+
+  if (!coverImageLocalPath)
+    throw new ApiError(401, "Cover Image filepath is missing.");
+
+  if (!req.user) throw new ApiError(401, "User can't be fetched.");
+
+  const coverImageUrl = req.user?.coverImage;
+
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+
+  if (!coverImage)
+    throw new ApiError(400, "Error while uploading on cover image.");
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        coverImage: coverImage.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken -__v -createdAt");
+
+  if (coverImageUrl) {
+    const parts = coverImageUrl.split("/");
+    // Get the last part of the URL
+    const lastPart = parts[parts.length - 1];
+    // Split the last part by '.' to remove the file extension
+    const cloudinaryFileName = lastPart.split(".")[0];
+
+    await deleteFromCloudinary(cloudinaryFileName);
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(201, user, "Cover Image updated successfully."));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refresshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
+  changeAvatar,
+  changeCoverImage,
+};
