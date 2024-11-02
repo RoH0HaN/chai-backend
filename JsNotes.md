@@ -1,8 +1,8 @@
-# Chai aur JavaScript
+# JavaScript Notes
 
 console.log(”Hello world”)
 
-JavaScript is Dynamically Typed Language, because we don’t specify the type of data, it automatically recognize it
+JavaScript is Dynamically Typed Language, because we don’t specify the type of data, it automatically recognise it
 
 ## Variable types:
 
@@ -33,9 +33,44 @@ console.table([name, userId, age, hobby, jobDesignation])
 // **This prints all the values in a tabular format
 ```
 
-Datatypes in JavaScript are as follows:
+## User Input in JavaScript
+
+### 1. **In a Browser (using `prompt`)**:
+
+You can use the `prompt()` function to capture user input in a browser environment.
+
+```jsx
+let name = prompt("What is your name?");
+let age = prompt("What is your age?");
+
+console.log(`Hello ${name}, you are ${age} years old.`);
+```
+
+**`prompt()`**: Displays a dialog box asking for user input. The input is always returned as a string.
+
+### 2. **In Node.js (using `readline` module)**:
+
+In a Node.js environment, the `readline` module is commonly used to capture user input from the command line.
+
+```jsx
+const readline = require('readline').createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+readline.question("What is your name? ", (name) => {
+  readline.question("What is your age? ", (age) => {
+    console.log(`Hello ${name}, you are ${age} years old.`);
+    readline.close();
+  });
+});
+```
+
+**`readline.question()`**: Takes user input in the terminal and passes it to a callback function.
 
 ## Datatypes:
+
+Datatypes in JavaScript are as follows:
 
 `“use strict”`  If we put this in the fist line of code file, then the compiler will treat our whole file codes as newer JavaScript version codes.
 
@@ -93,7 +128,7 @@ let user = {
 }
 console.log(user.name) // Access data using "." dot
 
-// Function
+// Function Expression
 let MyFunction = function() {
 	console.log("Hello World")
 }
@@ -631,4 +666,908 @@ arr.forEach((item, index, array) => {
 	console.log(`Item: ${item}, Index: ${index}, Array: ${array}`)
 })
 /* Output:
-Item: Python, Index: 0, Array: Python,
+Item: Python, Index: 0, Array: Python,Kotlin,Dart,Swift
+Item: Kotlin, Index: 1, Array: Python,Kotlin,Dart,Swift
+Item: Dart, Index: 2, Array: Python,Kotlin,Dart,Swift
+Item: Swift, Index: 3, Array: Python,Kotlin,Dart,Swift
+*/
+```
+
+## Map
+
+`Map` objects are collections of key-value pairs. A key in the `Map` **may only occur once**; it is unique in the `Map`'s collection. A `Map` object is iterated by key-value pairs — a `for...of` loop returns a 2-member array of `[key, value]` for each iteration. Iteration happens in *insertion order*, which corresponds to the order in which each key-value pair was first inserted into the map by the `set()` method (that is, there wasn't a key with the same value already in the map when `set()` was called).
+
+```jsx
+const map = new Map()
+
+map.set('IN', "India")
+map.set('USA', "United States of America")
+map.set('FR', "France")
+console.log(map);
+/* Output:
+Map(3) {
+  'IN' => 'India',
+  'USA' => 'United States of America',
+  'FR' => 'France'
+}
+*/
+
+map.set('FR', "France")
+console.log(map);
+/* Output: No Duplicate Value
+Map(3) {
+  'IN' => 'India',
+  'USA' => 'United States of America',
+  'FR' => 'France'
+}
+*/
+
+// For of loop
+for (const data of map) {
+  console.log(data);
+}
+/* Output: will be in separate array for each key, value pair
+[ 'IN', 'India' ]
+[ 'USA', 'United States of America' ]
+[ 'FR', 'France' ]
+*/
+
+// For of loop
+for (const [key, value] of map) {
+  console.log(key, ":-", value);
+}
+/* Output: here i can specify key and value separately
+IN :- India
+USA :- United States of America
+FR :- France
+*/
+```
+
+## Filter(), Map(), Reduce() and CHAINING
+
+```jsx
+// FILTER
+/*
+The filter() method is an iterative method. It calls a provided callbackFn function 
+once for each element in an array, and constructs a new array of all the values for 
+which callbackFn returns a truthy value. Array elements which do not pass the callbackFn 
+test are not included in the new array.
+*/
+
+// For Each won't return anything, for that if we need a values based on condition so we can filter()
+// filter() also provides index, and the array itself with the item inside callBack function
+const words = ['spray', 'elite', 'exuberant', 'destruction', 'present'];
+
+const result = words.filter((word) => word.length > 6);
+
+console.log(result);
+//Output: Array ["exuberant", "destruction", "present"]
+
+// MAP
+/*
+The map() method is an iterative method. It calls a provided callbackFn function once for
+each element in an array and constructs a new array from the results.
+*/
+// reduce() provides currentIndex, accumulator and the array itself with the currentValue inside callBack function
+const array1 = [1, 4, 9, 16];
+
+// Pass a function to map
+const map1 = array1.map((x) => x * 2);
+
+console.log(map1);
+// Output: Array [2, 8, 18, 32]
+
+// REDUCE
+/*
+The reduce() method of Array instances executes a user-supplied "reducer" callback 
+function on each element of the array, in order, passing in the return value from the 
+calculation on the preceding element. The final result of running the reducer across all 
+elements of the array is a single value.
+
+The first time that the callback is run there is no "return value of the previous 
+calculation". If supplied, an initial value may be used in its place. Otherwise the 
+array element at index 0 is used as the initial value and iteration starts from the next 
+element (index 1 instead of index 0).
+
+initialValue (Optional)
+A value to which accumulator is initialized the first time the callback is called. If 
+initialValue is specified, callbackFn starts executing with the first value in the array 
+as currentValue. If initialValue is not specified, accumulator is initialized to the 
+first value in the array, and callbackFn starts executing with the second value in the 
+array as currentValue. In this case, if the array is empty (so that there's no first 
+value to return as accumulator), an error is thrown.
+*/
+// reduce() also provides index, and the array itself with the item inside callBack function
+const array1 = [1, 2, 3, 4];
+
+// 0 + 1 + 2 + 3 + 4
+const initialValue = 0;
+const sumWithInitial = array1.reduce(
+  (accumulator, currentValue) => accumulator + currentValue,
+  initialValue,
+);
+
+console.log(sumWithInitial);
+// Output: 10
+
+// CHAINING
+const nums = [, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const newNums = nums
+  .map((num) => num * 10) // all nums as input
+  .map((num) => num + 1) // first map's output as input
+  .filter((num) => num >= 41) // second map's output as input
+
+// After filter() values stored in 'newNums'
+console.log(newNums);
+// Output: [41, 51, 61, 71, 81, 91, 101]
+```
+
+## DOM (Document Object Model)
+
+![Untitled](Untitled.png)
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    
+    <title>DOM learning</title>
+    <style>
+        .bg-black{
+            background-color: #212121;
+            color: #fff;
+        }
+    </style>
+</head>
+<body class="bg-black">
+    <div >
+        <h1  id="title" class="heading">DOM learning on Chai aur code <span style="display: none;">test text</span></h1>
+        <h2>Lorem ipsum dolor sit.</h2>
+        <h2>Lorem ipsum dolor sit.</h2>
+        <h2>Lorem ipsum dolor sit.</h2>
+        <p>Lorem ipsum dolor sit amet.</p>
+        <input type="password" name="" id="">
+
+        <ul>
+            <li class="list-item">one</li>
+            <li class="list-item">two</li>
+            <li class="list-item">three</li>
+            <li class="list-item">four</li>
+        </ul>
+    </div>
+</body>
+</html>
+
+<!-- All below DOM commands are based on above HTML file -->
+```
+
+```jsx
+document.getElementById('title')
+/* Output: Via this any element can be retrived using just its ID
+<h1 id="title" class="heading">
+	DOM learning on Chai aur code 
+	<span style="display: none;">test text</span>
+</h1>
+*/
+
+document.getElementById('title').className // By this we can check what is the class name of that element
+document.getElementById('title').getAttribute('class') // Can get any attribute values, just by its name
+
+document.getElementById('title').getAttribute('class')
+// Output: 'heading'
+document.getElementById('title').setAttribute('class', 'test') // Can set any attribute like key-value
+// Output: undefined
+document.getElementById('title').getAttribute('class')
+// Output: 'test' // But it will override the previous values
+
+const title = document.getElementById('title') // We can store the element inside an variable to do furture use
+// Output: undefined
+title
+/* Output: printing the variable's value
+<h1 id="title" class="heading">
+	DOM learning on Chai aur code 
+	<span style="display: none;">test text</span>
+</h1>
+*/
+
+// Styles of an elevent also can be changes using style option, accecsed by '.'
+title.style.backgroundColor = 'green'
+// Output: 'green'
+title.style.padding = '15px'
+// Output: '15px'
+
+title.innerHTML // Prints the inside HTML of that ID's tag
+// Output: 'DOM learning on Chai aur code <span style="display: none;">test text</span>'
+
+title.innerText // The hidden content is not visible here, refers to the current visible inner text
+// Output: 'DOM learning on Chai aur code'
+
+title.textContent // The hidden content is visible here, referes to the all text content visible & hidden
+// Output: 'DOM learning on Chai aur code test text'
+
+const htmlColl = document.getElementsByClassName('list-item')
+/* Output: Provides HTMLCollection
+HTMLCollection(4) [li.list-item, li.list-item, li.list-item, li.list-item]
+0: li.list-item
+1: li.list-item
+2: li.list-item
+3: li.list-item
+	length: 4
+	[[Prototype]]: HTMLCollection
+*/
+
+// **Convert HTMLCollection to an Array for further tasks
+const htmlCollArray = Array.from(htmlColl)
+// Output: undefined
+htmlCollArray
+/* Output:
+(4) [li.list-item, li.list-item, li.list-item, li.list-item]
+0: li.list-item
+1: li.list-item
+2: li.list-item
+3: li.list-item
+	length: 4
+	[[Prototype]]: Array(0)
+*/
+
+/* Query Selectors */ //Supports CSS also, can search using css eg: 'p:first-child'
+// **document.querySelector() just gives the first element it founds, means only a single value
+document.querySelector('#title') // For ID add '#' before ID name
+// Output: <h1 id="title" class="test" style="background-color: green; padding: 15px;">…</h1>
+document.querySelector('.list-item') // For Class add '.' before Class name
+// Output: <li class="list-item">…</li>
+document.querySelector('h2') // For Tag's just write tag name
+// Output: <h2>Lorem ipsum dolor sit.</h2>
+
+// **document.querySelectorAll() just gives the all values it can find over the page
+document.querySelectorAll('li')
+/* Output: Privides a 'NodeList' which is not exactly array but very similler
+NodeList(4) [li.list-item, li.list-item, li.list-item, li.list-item]
+0: li.list-item
+1: li.list-item
+2: li.list-item
+3: li.list-item
+	length: 
+	4[[Prototype]]: NodeList
+*/
+```
+
+### Relations in DOM
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM | Chai aur code</title>
+</head>
+<body style="background-color: #212121; color: #fff;">
+    <div class="parent">
+        <!-- this is a comment -->
+        <div class="day">Monday</div>
+        <div class="day">Tuesday</div>
+        <div class="day">Wednesday</div>
+        <div class="day">Thursday</div>
+    </div>
+</body>
+</html>
+<!-- All below DOM commands are based on above HTML file -->
+```
+
+```jsx
+const parent = document.querySelector('.parent')
+console.log(parent)
+/* Output:
+<div class="parent">
+    <!-- this is a comment -->
+    <div class="day">Monday</div>
+    <div class="day">Tuesday</div>
+    <div class="day">Wednesday</div>
+    <div class="day">Thursday</div>
+</div>
+*/
+console.log(parent.children)
+/* Output:
+HTMLCollection(4) [div.day, div.day, div.day, div.day]
+0: div.day
+1: div.day
+2: div.day
+3: div.day
+	length: 4
+	[[Prototype]]: HTMLCollection
+*/
+
+for (let i = 0; i < parent.children.length; i++) {
+	console.log(parent.children[i]);
+	parent.children[i].style.color = 'green'
+}
+
+console.log(parent.firstElementChild);
+// Output: <div class="day">Monday</div>
+console.log(parent.lastElementChild);
+// Output: <div class="day">Thursday</div>
+
+const dayOne = document.querySelector('.day')
+console.log(dayOne.parentElement)
+/* Output:
+<div class="parent">
+    <!-- this is a comment -->
+    <div class="day">Monday</div>
+    <div class="day">Tuesday</div>
+    <div class="day">Wednesday</div>
+    <div class="day">Thursday</div>
+</div>
+*/
+console.log(dayOne.nextElementSibling)
+// Output: <div class="day">Tuesday</div>
+```
+
+### Add Element DOM
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chai aur code </title>
+</head>
+<body style="background-color: #212121; color: #fff;">
+    
+</body>
+</html>
+<!-- All below DOM commands are based on above HTML file -->
+```
+
+```jsx
+const div = document.createElement('div') // Create a div element, but not added in the web page
+console.log(div);
+// Output: <div></div>
+div.className = "main" // add an class attribute named 'main' to the created div
+div.id = Math.round(Math.random() * 10 + 1) // add an ID with random()
+div.setAttribute("title", "generated title") // add title attribute
+div.style.backgroundColor = "green" // added background color
+div.style.padding = "12px" // add padding
+// div.innerText = "Chai aur code" // method 1: to add contents inside div
+const addText = document.createTextNode("Chai aur code")
+div.appendChild(addText) // method 2: to add content to div
+
+document.body.appendChild(div) // atlast append the 'div' to the documents 'body'
+```
+
+### Edit and Remove element in DOM
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chai aur code | DOM</title>
+</head>
+<body style="background-color: #212121; color: #fff;">
+    <ul class="language">
+        <li>Javascript</li>
+    </ul>
+</body>
+</html>
+<!-- All below DOM commands are based on above HTML file -->
+```
+
+```jsx
+//ADD
+function addLanguage(langName){
+	const li = document.createElement('li'); // Create an ListItem element
+	li.innerHTML = `${langName}` // add the language name to the inside of ListItem
+	document.querySelector('.language').appendChild(li) // find the 'Ul' and append the 'Li' to it
+}
+addLanguage("python")
+addLanguage("typescript")
+
+//EDIT
+const secondLang = document.querySelector("li:nth-child(2)") // select the second 'li' from 'ul'
+const newli = document.createElement('li') // create new 'li'
+newli.textContent = "Mojo" // add textContent to the 'li'
+secondLang.replaceWith(newli) // now replace with the second 'li' which is selected first
+
+// other method to change element
+const firstLang = document.querySelector("li:first-child")
+firstLang.outerHTML = '<li>TypeScript</li>' // change the whole HTML to replace existing HTML with new HTML
+
+//REMOVE
+const lastLang = document.querySelector('li:last-child')
+lastLang.remove() // remove the child
+```
+
+## Events
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>htnml Events </title>
+</head>
+<body style="background-color: #414141; color: aliceblue;">
+    <h2>Amazing image</h2>
+    <div >
+        <ul id="images">
+            <li><img width="200px" id="photoshop" src="https://images.pexels.com/photos/3561339/pexels-photo-3561339.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt="photoshop"></li>
+            <li><img width="200px" id="japan" src="https://images.pexels.com/photos/3532553/pexels-photo-3532553.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt=""></li>
+            <li><img width="200px" id="river" src="https://images.pexels.com/photos/3532551/pexels-photo-3532551.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt=""></li>
+            <li><img width="200px" id="owl" src="https://images.pexels.com/photos/3532552/pexels-photo-3532552.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt="" ></li>
+            <li><img width="200px" id="prayer" src="https://images.pexels.com/photos/2522671/pexels-photo-2522671.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load" alt=""></li>
+            <li><a style="color: aliceblue;" href="https://google.com" id="google">Google</a></li>
+        </ul>
+   </div>
+</body>
+</html>
+<!-- All below JavaScript are based on above HTML file -->
+```
+
+```jsx
+// It is an approach to add onClick() listener to elements, but not a good approach
+document.getElementById('owl').onclick = function() {
+  alert('OWL')
+}
+
+// Best approach to use EventListener
+document.getElementById('owl').addEventListener('click', function () {
+  alert('OWL')
+})
+
+document.getElementById('owl').addEventListener('click', function (event) {
+  console.log(event);
+}, false)
+// type, timestamp, defaultPrevented
+// target, toElement, srcElement, currentTarget,
+// clientX, clientY, screenX, screenY
+// altkey, ctrlkey, shiftkey, keyCode
+
+// EVENT BUBBLING
+document.getElementById('images').addEventListener('click', function(e){
+	console.log("clicked inside the ul");
+}, false)
+
+document.getElementById('owl').addEventListener('click', function(e){
+	console.log("owl clicked");
+	e.stopPropagation() // this method stops the BUBBLING
+}, false)
+/* Output:
+owl clicked
+clicked inside the ul
+*/
+
+// EVENT CAPTURING
+document.getElementById('images').addEventListener('click', function(e){
+	console.log("clicked inside the ul");
+}, true)
+
+document.getElementById('owl').addEventListener('click', function(e){
+	console.log("owl clicked");
+}, true)
+/* Output:
+clicked inside the ul
+owl clicked
+*/
+
+document.getElementById('google').addEventListener('click',function(e){
+	e.preventDefault() // Prevent the default action
+	e.stopPropagation()
+	console.log("google clicked");
+}, false)
+
+// REMOVE ELEMENT
+document.querySelector('#images').addEventListener('click', function(e){
+	console.log(e.target.tagName);
+	if (e.target.tagName === 'IMG') {
+		console.log(e.target.id);
+		let removeIt = e.target.parentNode
+		removeIt.remove()
+	}
+})
+```
+
+## Asynchronous Code
+
+![Untitled](Untitled%201.png)
+
+![Untitled](Untitled%202.png)
+
+```html
+<!--SET TIMEOUT FUNCTION EXAMPLE-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Rohan Debnath</h1>
+    <button id="stop">Stop</button>
+</body>
+<script>
+    const changeText = function () {
+	    document.querySelector('h1').textContent = "Best JavaScript Code" 
+    }
+    const changeMe = setTimeout(changeText, 2000) // Start the function after 2sec
+
+    document.querySelector('#stop').addEventListener('click', function () {
+      clearTimeout(changeMe) // stop the function by clearing the timeout before execute
+      console.log('STOPPED'); 
+    })
+</script>
+</html>
+```
+
+```html
+<!--SET INTERVAL FUNCTION EXAMPLE-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Rohan Debnath</h1>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+</body>
+<script>
+    let intervalID
+    
+    const date = (txt) => {
+        console.log(txt, Date.now());
+    }
+
+    document.querySelector('#start').addEventListener('click', function () {
+        if (!intervalID) {
+             intervalID = setInterval(date, 1000, "Hello, JS"); 
+             // Interval method runs continiously after a time interval
+         }
+    })
+    
+
+    document.querySelector('#stop').addEventListener('click', function () {
+        clearInterval(intervalID); // Stops anytime by clearing the interval
+        intervalID = null
+        console.log('STOPPED');
+    })
+</script>
+</html>
+```
+
+### Send API Request and Parse the Response
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTP Request</title>
+</head>
+<body>
+    <button id="send">Send Request</button>
+    
+</body>
+<Script>
+    function addDetailsToCard (res) { // Create a card and show information from response
+        const div = document.createElement('div')
+        div.className = 'card'
+        const img = document.createElement('img')
+        img.setAttribute('src', res.avatar_url)
+        img.setAttribute('alt', 'Avatar')
+        const containerDiv = document.createElement('div')
+        containerDiv.className = 'container'
+        containerDiv.innerHTML = `<h4><b>${res.name}</b></h4><p>Followers: ${res.followers}</p>`
+
+        div.appendChild(img)
+        div.appendChild(containerDiv)
+        document.body.appendChild(div)
+
+    }
+    function sendRequest() { // Sending API request using XMLHttpRequest()
+        const uri = 'https://api.github.com/users/hiteshchoudhary'
+        const xhr = new XMLHttpRequest()
+        let apiResponse
+        xhr.open('GET', uri)
+        /* STATES:
+          0	UNSENT	Client has been created. open() not called yet.
+					1	OPENED	open() has been called.
+					2	HEADERS_RECEIVED	send() has been called, and headers and status are available.
+					3	LOADING	Downloading; responseText holds partial data.
+					4	DONE	The operation is complete.
+        */
+        xhr.onreadystatechange = function (){ // This monitor the states 
+            console.log(xhr.readyState)
+            if (xhr.readyState === 4) {
+                apiResponse = JSON.parse(this.responseText)
+                console.log(apiResponse);
+                addDetailsToCard(apiResponse)
+            }
+        }
+        xhr.send()
+        
+    }
+    document.querySelector('#send').addEventListener('click', function(event){
+        
+       const data = sendRequest()
+       
+    })
+    
+</Script>
+</html>
+```
+
+## Promises
+
+```jsx
+/*
+    Promises can be explicitly created by using a promise object promise object accepts a callback function which 
+    have two parameters resolve and reject these 2 are functions itself so an api or an promise can either be resolved 
+    or be rejected so it is dependent on the api calls or whatever calls you have done like file manipulation calls and
+    other network calls so whenever the calls is finished and the promises is resolved then the resolve function executed 
+    and resolve function also accept some arguments so that can be forwarded to the caller the response from the api and 
+    the reject part accepts some arguments also it can be some kind of error which has occur while calling or executing 
+    the functions asynchronously
+*/
+
+const promiseOne = new Promise((resolve, reject) => {
+  const error = false;
+  setTimeout(() => {
+    console.log("Timeout Done");
+    if (!error) {
+      resolve({ name: "Rohan Debnath", hobby: "Coding" });
+    } else {
+      reject("Error: Something went wrong");
+    }
+  }, 1000);
+});
+
+/*
+    Here promises are executed by an assing await method where we are using try catch method so 
+    that if resolve executed and the promise is done resolved so then the try method will execute 
+    and if any error occurs in that and the reject executes then the promise is rejected so then 
+    the catch will handle it properly
+*/
+async function runPromise() {
+  try {
+    const response = await promiseOne;
+    console.log(response);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+runPromise();
+
+/*
+    Another way of executing promises is the fetch method the fetch method helps us to call an 
+    api or a web url then it fetch the response that the API returns if there is no conflict so 
+    the 'then' method is called and it receives and response then if we want to pass this response 
+    or we can do the chaining method so from the first then method we can 'return' the 'response.json()' 
+    so because the response is come as a string so we have to convert it into object for parsing Then 
+    the second then method receives what first then method returns after that we can parse and do whatever 
+    we need to do with that objection object and if there is any conflict or error occurs then the catch 
+    method will definitely catch it and we can handle there the error properly and after that we have an 
+    finally method so it will execute whether it occur conflict or not
+*/
+
+fetch("https://api.github.com/users/hiteshchoudhary")
+  .then((response) => {
+    return response.json();
+  })
+  .then((data) => {
+    console.log("The name is: ", data.name);
+  })
+  .catch((error) => {
+    console.log("Error: ", error);
+  })
+  .finally(() => {
+    console.log("The promise is either 'Resolved' or 'Rejected'");
+  });
+
+// Another way to create and consume promise
+const promiseTwo = new Promise(function (resolve, reject) {
+  setTimeout(function () {
+    let error = true;
+    if (!error) {
+      resolve({ username: "hitesh", password: "123" });
+    } else {
+      reject("ERROR: Something went wrong");
+    }
+  }, 1000);
+});
+
+promiseTwo
+  .then((user) => {
+    console.log(user);
+    return user.username;
+  })
+  .then((username) => {
+    console.log(username);
+  })
+  .catch(function (error) {
+    console.log(error);
+  })
+  .finally(() => console.log("The promise is either resolved or rejected"));
+```
+
+## Fetch ()
+
+![Untitled](Untitled%203.png)
+
+## Objects and Prototypes
+
+```jsx
+// We can explicitly add some prototype functionality to anything, it will act as default functionalities
+
+function multipleBy5(num){
+
+    return num*5
+}
+
+multipleBy5.power = 2
+
+console.log(multipleBy5(5));
+console.log(multipleBy5.power);
+console.log(multipleBy5.prototype);
+
+function createUser(username, score){
+    this.username = username
+    this.score = score
+}
+
+createUser.prototype.increment = function(){
+    this.score++
+}
+createUser.prototype.printMe = function(){
+    console.log(`price is ${this.score}`);
+}
+
+const chai = new createUser("chai", 25)
+const tea = createUser("tea", 250)
+
+chai.printMe()
+
+let anotherUsername = "ChaiAurCode     "
+
+String.prototype.trueLength = function(){
+    console.log(`${this}`);
+    console.log(`True length is: ${this.trim().length}`);
+}
+
+anotherUsername.trueLength()
+
+/*
+
+Here's what happens behind the scenes when the new keyword is used:
+
+A new object is created: The new keyword initiates the creation of a new JavaScript object.
+
+A prototype is linked: The newly created object gets linked to the prototype property of the constructor function. This means that it has access to properties and methods defined on the constructor's prototype.
+
+The constructor is called: The constructor function is called with the specified arguments and this is bound to the newly created object. If no explicit return value is specified from the constructor, JavaScript assumes this, the newly created object, to be the intended return value.
+
+The new object is returned: After the constructor function has been called, if it doesn't return a non-primitive value (object, array, function, etc.), the newly created object is returned.
+
+*/
+```
+
+## Call() and This
+
+```jsx
+function SetUsername(username){
+    //complex DB calls
+    this.username = username
+    console.log("called");
+}
+
+function createUser(username, email, password){
+    SetUsername.call(this, username) // Here we are calling an additional funtion to do some task
+																	   // We also pass the 'this' current context of this function,
+																	   // so that the outsource function can actually use this function's
+																	   // context and update this function's parameters
+   
+    this.email = email
+    this.password = password
+}
+
+const chai = new createUser("chai", "chai@fb.com", "123")
+console.log(chai);
+```
+
+## Bind()
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React</title>
+</head>
+<body>
+    <button>Button Clicked</button>
+</body>
+<script>
+    class React {
+        constructor(){
+            this.library = "React"
+            this.server = "https://localhost:300"
+
+            //requirement
+            document
+                .querySelector('button')
+                .addEventListener('click', this.handleClick.bind(this))
+                /*
+                Here by default the query selector button is selected and the button 
+                is calling a function or a handler which prints button clicked and 
+                there is also a thing called this dot server so whenever I pass this 
+                through the function that this belongs to the button itself because 
+                the button is calling the function and button is inside a class 
+                constructor and inside the class there is some methods but the 
+                this keyword which button is passed passing is only referred 
+                button so we have to use bind function to bind the constructor 
+                variables and the button variables altogether and then forward it to 
+                the handler class
+                */
+
+        }
+        handleClick(){
+            console.log("button clicked");
+            console.log(this.server);
+        }
+    }
+
+    const app = new React()
+</script>
+</html>
+```
+
+## How to change Object’s default private properties
+
+```jsx
+const descripter = Object.getOwnPropertyDescriptor(Math, "PI")
+
+console.log(descripter);
+console.log(Math.PI);
+Math.PI = 5
+console.log(Math.PI);
+
+const chai = {
+    name: 'ginger chai',
+    price: 250,
+    isAvailable: true,
+
+    orderChai: function(){
+        console.log("chai nhi bni");
+    }
+}
+
+console.log(Object.getOwnPropertyDescriptor(chai, "name"));
+
+Object.defineProperty(chai, 'name', { // On the key 'name' some default operations has been modified
+    writable: false,
+    enumerable: true,
+    
+})
+
+console.log(Object.getOwnPropertyDescriptor(chai, "name"));
+
+for (let [key, value] of Object.entries(chai)) {
+    if (typeof value !== 'function') {
+        
+        console.log(`${key} : ${value}`);
+    }
+}
+```
